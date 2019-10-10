@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, ɵConsole } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Usuario } from '../../models/usuario.model';
 import { URL_SERVICIOS } from '../../config/config';
@@ -8,6 +8,7 @@ import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { Router } from '@angular/router';
 import { SubirArchivoService } from '../subir-archivo/subir-archivo.service';
 import { map, tap } from 'rxjs/operators';
+//import * as swal from 'sweetalert';
 
 
 @Injectable()
@@ -103,15 +104,17 @@ export class UsuarioService {
   actualizarUsuario(usuario: Usuario) {
     let url = URL_SERVICIOS + '/usuario/' + usuario._id;
     url += '?token=' + this.token;
-
+    console.log(usuario);
     return this.http.put(url, usuario)
       .map((resp: any) => {
-
-        let usuarioDB: Usuario = resp.usuarios;
-
-        this.guardarStorage(usuarioDB._id, this.token, usuarioDB);
-        //  sweetAlert('Usuario Actualizado',usuario.nombre, 'success');
-        console.log("Usuario Actualizado");
+        
+        if(usuario._id==this.usuario._id)
+        {          
+          let usuarioDB: Usuario = resp.usuarios;
+          this.guardarStorage(usuarioDB._id, this.token, usuarioDB);
+        }
+     
+        //swal('Usuario Actualizado',usuario.nombre, 'success');
         return true;
       })
   }
@@ -133,15 +136,23 @@ export class UsuarioService {
 
   buscarUsuario(termino: string) {
 
-
-    
-
     let url = URL_SERVICIOS + '/busqueda/coleccion/usuarios/' + termino;
     return this.http.get(url)
-      .pipe(
-        tap(r => console.log("respuesta del get de usuarios =>>", r)),
-        map((resp: any) => resp.usuarios)
-      )
-      
+       . map((resp: any) => resp.usuarios);
+  }
+
+  borrarUsuario(id:string)
+  {
+   let url=URL_SERVICIOS+'/usuario/'+id;
+   url =url+'?token='+this.token;
+   
+   return this.http.delete(url)
+   .map(resp=>{
+    //swal('Usuario borrado','Usuario eliminado correctamente','success');
+    return true;
+   })
   }
 }
+
+
+
